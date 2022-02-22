@@ -1,6 +1,6 @@
 <template>
   <el-container style="height:100%">
-    <el-header><Header></Header></el-header>
+    <Header></Header>
     <el-main></el-main>
   </el-container>
 </template>
