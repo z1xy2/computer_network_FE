@@ -4,14 +4,13 @@
        id='ElMenu'
         background-color="#545c64"
         :router="true"
-        class="el-menu-demo"
         mode="horizontal"
         text-color="#fff"
         active-text-color="#ffd04b"
         @select="handleSelect"
       >
       <h1>操作系统课程设计</h1>
-        <el-menu-item index="/" route="">主页</el-menu-item>
+        <el-menu-item index="/">主页</el-menu-item>
         <el-submenu index="2">
           <template slot="title">我的工作台</template>
           <el-menu-item index="2-1">选项1</el-menu-item>
@@ -37,6 +36,7 @@
 <style>
 #ElHeader {
   height: 100%;
+  padding: 0px;
 }
 #ElMenu{
   display: flex;
@@ -51,8 +51,9 @@ h1 {
 }
 </style>
 
-<script>
+<script scoped>
 export default {
+  name:'Header',
   data() {
     return {
       activeIndex: "1",

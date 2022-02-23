@@ -1,7 +1,7 @@
 <template>
-  <el-container style="height:100%">
+  <el-container style="height:100%" direction="vertical">
     <Header></Header>
-    <el-main></el-main>
+    <router-view></router-view>
   </el-container>
 </template>
 
@@ -14,6 +14,5 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
 </style>
