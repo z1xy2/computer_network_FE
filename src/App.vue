@@ -10,7 +10,10 @@ import Header from './components/Header.vue'
 export default {
   components:{
     Header
-  }
+  },
+  // mounted() {
+  //   console.log(this)
+  // },
 }
 </script>
 
