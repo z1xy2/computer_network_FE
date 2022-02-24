@@ -90,8 +90,8 @@ export default {
           },
         })
         .then((response) => {
-          console.log(response);
           this.centerDialogVisible = true;
+          console.log(response.data.dataDic1);
         })
         .catch((response) => {
           console.log(response);
