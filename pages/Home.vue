@@ -65,6 +65,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 export default {
   name: "Home",
   data() {
@@ -91,7 +92,8 @@ export default {
         })
         .then((response) => {
           this.centerDialogVisible = true;
-          console.log(response.data.dataDic1);
+          Vue.prototype.$data1=response.data;
+          console.log('data',Vue.prototype.$data1);
         })
         .catch((response) => {
           console.log(response);
