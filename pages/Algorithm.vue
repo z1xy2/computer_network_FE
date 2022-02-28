@@ -22,6 +22,7 @@
               >{{ item }}</el-button
             >
           </div>
+          <el-divider></el-divider>
           <div id="mem" class="butLine">
             <span>内存块页号 </span>
             <el-button
