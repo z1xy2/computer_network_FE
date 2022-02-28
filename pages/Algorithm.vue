@@ -12,12 +12,28 @@
       <el-card>
         <div class="block">
           <span class="demonstration">步骤导航栏</span>
-          <span v-for="item in memory_history[index]" :key="item">{{ item[0] }}</span>
-          <el-slider v-model="index" :max="len"></el-slider>
+          <div>
+            <el-button
+              :type="buttonCol(index)"
+              v-for="(item, index) in memory_history[step_index]"
+              :key="index"
+              >{{ item[0] }}</el-button
+            >
+          </div>
+          <div>
+            <el-button
+              :type="buttonCol(index)"
+              v-for="(item, index) in memory_history[step_index]"
+              :key="index"
+              style="margin-top:10px"
+              >{{ item[1] }}</el-button
+            >
+          </div>
+          <el-slider v-model="step_index" :max="len - 1"></el-slider>
           <el-input-number
-            v-model="index"
+            v-model="step_index"
             :min="0"
-            :max="len"
+            :max="len - 1"
             label="描述文字"
           ></el-input-number>
         </div>
@@ -30,9 +46,18 @@
 export default {
   data() {
     return {
-      index: 0,
+      step_index: 0,
       selArg: "FIFO",
     };
+  },
+  methods:{
+    buttonCol(index){
+      if(index==this.replace_idx[this.step_index]){
+        return 'success';
+      }else{
+        return 'primary'
+      }
+    },    
   },
   computed: {
     memory_history() {
@@ -53,14 +78,14 @@ export default {
         return this.$data1.dataDic3.page_faults;
       }
     },
-    replace_idx(){
+    replace_idx() {
       if (this.selArg == "FIFO") {
         return this.$data1.dataDic1.replace_idx;
       } else if (this.selArg == "LRU") {
         return this.$data1.dataDic2.replace_idx;
       } else {
         return this.$data1.dataDic3.replace_idx;
-      }      
+      }
     },
     len() {
       return this.page_faults.length;
