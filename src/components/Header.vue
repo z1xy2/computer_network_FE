@@ -12,7 +12,7 @@
       <h1>操作系统课程设计</h1>
         <el-menu-item index="/">主页</el-menu-item>
         <el-menu-item index="/Algorithm" >算法展示</el-menu-item>
-        <el-menu-item index="3" >统计数据</el-menu-item>
+        <el-menu-item index="/Statistics" >统计数据</el-menu-item>
       </el-menu>
   </el-header>
 </template>
