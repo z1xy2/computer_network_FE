@@ -6,8 +6,8 @@
     ref="ruleForm"
     label-width="100px"
   >
-    <el-form-item label="账号">
-      <el-input v-model="id" style="width: 230px"></el-input>
+    <el-form-item label="账号" prop="id">
+      <el-input v-model="ruleForm.id" style="width: 230px"></el-input>
     </el-form-item>
     <el-form-item label="密码" prop="pass">
       <el-input
@@ -36,6 +36,37 @@
 export default {
   name: "Register",
   data() {
+    var checkId = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error("年龄不能为空"));
+      }
+      this.axios({
+        method: "POST",
+        url: "/api/myapp/checkId",
+        data: {
+          'id': 1,
+        },
+      })
+        .then((response) => {
+          console.log(response);
+          callback()
+          alert("ok");
+        })
+        .catch((response) => {
+          console.log(response);
+        });
+      //   setTimeout(() => {
+      //     if (!Number.isInteger(value)) {
+      //       callback(new Error("请输入数字值"));
+      //     } else {
+      //       if (value < 18) {
+      //         callback(new Error("必须年满18岁"));
+      //       } else {
+      //         callback();
+      //       }
+      //     }
+      //   }, 1000);
+    };
     var checkAge = (rule, value, callback) => {
       if (!value) {
         return callback(new Error("年龄不能为空"));
@@ -57,8 +88,10 @@ export default {
         callback(new Error("请输入密码"));
       } else {
         if (this.ruleForm.checkPass !== "") {
+          //如果不为空再对checkpass进行校验调用校验函数
           this.$refs.ruleForm.validateField("checkPass");
         }
+        //不返回错误
         callback();
       }
     };
@@ -79,6 +112,7 @@ export default {
         age: "",
       },
       rules: {
+        id: [{ validator: checkId, trigger: "blur" }],
         pass: [{ validator: validatePass, trigger: "blur" }],
         checkPass: [{ validator: validatePass2, trigger: "blur" }],
         age: [{ validator: checkAge, trigger: "blur" }],
@@ -87,6 +121,8 @@ export default {
   },
   methods: {
     submitForm(formName) {
+      //如果校验函数都执行完了执行validate函数
+      //传入的valid为boolean类型,校验都通过为true，否则为false
       this.$refs[formName].validate((valid) => {
         if (valid) {
           alert("submit!");
@@ -96,6 +132,7 @@ export default {
         }
       });
     },
+    //清空表单
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },

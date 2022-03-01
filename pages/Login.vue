@@ -18,9 +18,9 @@
           <el-input v-model="user.id" style="width: 230px"></el-input>
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="user.password" style="width: 230px"></el-input>
+          <el-input v-model="user.password" style="width: 230px" type="password"></el-input>
         </el-form-item>
-        <el-form-item>
+        <el-form-item style="margin-left:50px">
           <el-button type="primary" @click="onSubmit">立即登录</el-button>
         </el-form-item>
       </el-form>
