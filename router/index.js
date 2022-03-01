@@ -1,15 +1,21 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../pages/Home'
+import Login from '../pages/Login'
 import Algorithm from '../pages/Algorithm'
 import Statistic from '../pages/Statistics'
+import Register from '../src/components/Register'
 Vue.use(VueRouter)
 const routes=[
     {
         path:'/',
-        name:'Home',//简化路由名，可以不写
-        component:Home
+        name:'Login',//简化路由名，可以不写
+        component:Login
     },
+    {
+        path:'/Register',
+        name:'Register',//简化路由名，可以不写
+        component:Register
+    },    
     {
         path:'/Algorithm',
         name:'Algorithm',//简化路由名，可以不写

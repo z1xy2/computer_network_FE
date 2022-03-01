@@ -1,33 +1,27 @@
 <template>
   <el-main>
     <div id="getDataDiv">
-      <h2 style="margin-left: 110px">算法执行方式</h2>
+      <h2 align="center">欢迎来到聊天室</h2>
       <el-radio-group id="RadioGroup" v-model="radio1">
         <el-radio-button
-          label="自动生成页面序列"
-          style="margin-left: 40px"
+          label="账号登录"
         ></el-radio-button>
-        <el-radio-button label="指定页面序列"></el-radio-button>
+        <el-radio-button label="账号注册"></el-radio-button>
       </el-radio-group>
       <el-form
         id="form1"
-        ref="form"
-        :model="form"
+        :model="user"
         label-width="90px"
         v-if="showPage1"
       >
-        <el-form-item label="内存块数">
-          <el-input v-model="form.num" style="width: 230px"></el-input>
+        <el-form-item label="账号">
+          <el-input v-model="user.id" style="width: 230px"></el-input>
         </el-form-item>
-        <el-form-item label="页面数">
-          <el-select v-model="form.seqSize" placeholder="请选择内存大小">
-            <el-option v-for="value in options" :key="value" :value="value">
-            </el-option>
-          </el-select>
+        <el-form-item label="密码">
+          <el-input v-model="user.password" style="width: 230px"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">立即创建</el-button>
-          <el-button>取消</el-button>
+          <el-button type="primary" @click="onSubmit">立即登录</el-button>
         </el-form-item>
       </el-form>
       <el-form
@@ -37,15 +31,14 @@
         label-width="90px"
         v-if="!showPage1"
       >
-        <el-form-item label="内存块数">
-          <el-input v-model="form.num" style="width: 230px"></el-input>
+        <el-form-item label="账号">
+          <el-input v-model="user.id" style="width: 230px"></el-input>
         </el-form-item>
-        <el-form-item label="详细序列">
-          <el-input v-model="form.seq" style="width: 230px"></el-input>
+        <el-form-item label="密码">
+          <el-input v-model="user.password" style="width: 230px"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">立即创建</el-button>
-          <el-button>取消</el-button>
+          <el-button type="primary" @click="onSubmit">立即注册</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -57,7 +50,9 @@
     >
       <el-result icon="success" title="生成成功">
         <template slot="extra">
-          <el-button type="primary" size="medium" @click="jump">查看详情</el-button>
+          <el-button type="primary" size="medium" @click="jump"
+            >查看详情</el-button
+          >
         </template>
       </el-result>
     </el-dialog>
@@ -65,17 +60,17 @@
 </template>
 
 <script>
-import Vue from 'vue'
+import Vue from "vue";
 export default {
-  name: "Home",
+  name: "Login",
   data() {
     return {
-      radio1: "自动生成页面序列",
+      radio1: "账号登录",
       centerDialogVisible: false,
-      form: {
-        num: 3,
-        seq: "",
-        seqSize: 15,
+      user: {
+        id: "",
+        name: "",
+        password: "",
       },
       //记录选择的内存大小
       options: ["随机", 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
@@ -92,20 +87,20 @@ export default {
         })
         .then((response) => {
           this.centerDialogVisible = true;
-          Vue.prototype.$data1=response.data;
-          console.log('data',Vue.prototype.$data1);
+          Vue.prototype.$data1 = response.data;
+          console.log("data", Vue.prototype.$data1);
         })
         .catch((response) => {
           console.log(response);
         });
     },
-    jump(){
-      this.$router.push('/Algorithm')
-    }
+    jump() {
+      this.$router.push("/Algorithm");
+    },
   },
   computed: {
     showPage1() {
-      if (this.radio1 == "自动生成页面序列") {
+      if (this.radio1 == "账号登录") {
         return true;
       } else {
         return false;
@@ -127,7 +122,10 @@ export default {
   background-color: rgba(255, 255, 255, 0.9);
 }
 .el-radio-group {
+  margin-top: 30px;
   margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
 }
 #form1 > {
   width: 100px;

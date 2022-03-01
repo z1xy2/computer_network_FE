@@ -1,15 +1,12 @@
 <template>
-  <el-container style="height:100%" direction="vertical">
-    <Header></Header>
-    <router-view></router-view>
-  </el-container>
+  <Login></Login>
 </template>
 
 <script>
-import Header from './components/Header.vue'
+import Login from '../pages/Login.vue'
 export default {
   components:{
-    Header
+    Login
   },
   // mounted() {
   //   console.log(this)
