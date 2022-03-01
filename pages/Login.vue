@@ -24,23 +24,7 @@
           <el-button type="primary" @click="onSubmit">立即登录</el-button>
         </el-form-item>
       </el-form>
-      <el-form
-        id="form1"
-        ref="form"
-        :model="form"
-        label-width="90px"
-        v-if="!showPage1"
-      >
-        <el-form-item label="账号">
-          <el-input v-model="user.id" style="width: 230px"></el-input>
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="user.password" style="width: 230px"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit">立即注册</el-button>
-        </el-form-item>
-      </el-form>
+      <Register v-if="!showPage1"></Register>
     </div>
     <el-dialog
       title="提示"
@@ -60,9 +44,11 @@
 </template>
 
 <script>
+import Register from '../src/components/Register.vue'
 import Vue from "vue";
 export default {
   name: "Login",
+  components:{Register},
   data() {
     return {
       radio1: "账号登录",
