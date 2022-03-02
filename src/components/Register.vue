@@ -44,13 +44,16 @@ export default {
         method: "POST",
         url: "/api/myapp/checkId",
         data: {
-          'id': 1,
+          id: this.ruleForm.id,
         },
       })
         .then((response) => {
-          console.log(response);
-          callback()
-          alert("ok");
+          console.log(response.data);
+          if (response.data.find == true) {
+            callback(new Error("id已被注册"));
+          } else {
+            callback();
+          }
         })
         .catch((response) => {
           console.log(response);
@@ -121,13 +124,27 @@ export default {
   },
   methods: {
     submitForm(formName) {
+      // validate函数猜测是默认对所有数据进行了校验
       //如果校验函数都执行完了执行validate函数
       //传入的valid为boolean类型,校验都通过为true，否则为false
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert("submit!");
+          this.axios({
+            method: "POST",
+            url: "/api/myapp/addUser",
+            data: {
+              user: this.ruleForm,
+            },
+          })
+            .then((response) => {
+              console.log(response.data);
+            })
+            .catch((response) => {
+              console.log(response);
+            });
+          alert("注册成功!");
         } else {
-          console.log("error submit!!");
+          alert("输入的信息有误!");
           return false;
         }
       });
