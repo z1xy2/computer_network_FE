@@ -18,7 +18,7 @@
           <el-input v-model="user.id" style="width: 230px"></el-input>
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="user.password" style="width: 230px" type="password"></el-input>
+          <el-input v-model="user.pass" style="width: 230px" type="pass"></el-input>
         </el-form-item>
         <el-form-item style="margin-left:50px">
           <el-button type="primary" @click="onSubmit">立即登录</el-button>
@@ -32,10 +32,10 @@
       width="30%"
       center
     >
-      <el-result icon="success" title="生成成功">
+      <el-result icon="success" title="登录成功">
         <template slot="extra">
           <el-button type="primary" size="medium" @click="jump"
-            >查看详情</el-button
+            >进入</el-button
           >
         </template>
       </el-result>
@@ -45,7 +45,7 @@
 
 <script>
 import Register from '../src/components/Register.vue'
-import Vue from "vue";
+// import Vue from "vue";
 export default {
   name: "Login",
   components:{Register},
@@ -56,32 +56,36 @@ export default {
       user: {
         id: "",
         name: "",
-        password: "",
+        pass: "",
       },
-      //记录选择的内存大小
-      options: ["随机", 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
     };
   },
   methods: {
     onSubmit() {
       console.log("submit!");
-      this.axios
-        .get("http://127.0.0.1:8000/myapp/", {
-          params: {
-            form: this.form,
-          },
-        })
+      this.axios({
+        method:"POST",
+        url:"/api/myapp/Login",
+        data:{
+          user:this.user
+        }
+      })
+
         .then((response) => {
-          this.centerDialogVisible = true;
-          Vue.prototype.$data1 = response.data;
-          console.log("data", Vue.prototype.$data1);
+          
+          if(response.data.result=='success'){
+            this.centerDialogVisible = true;
+            localStorage.setItem('id', this.user.id);
+          }else{
+            alert('账号密码不匹配')
+          }
         })
         .catch((response) => {
           console.log(response);
         });
     },
     jump() {
-      this.$router.push("/Algorithm");
+      this.$router.push("/Chart");
     },
   },
   computed: {

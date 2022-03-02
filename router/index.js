@@ -4,30 +4,36 @@ import Login from '../pages/Login'
 import Algorithm from '../pages/Algorithm'
 import Statistic from '../pages/Statistics'
 import Register from '../src/components/Register'
+import Chart from '../pages/Chart'
 Vue.use(VueRouter)
-const routes=[
+const routes = [
     {
-        path:'/',
-        name:'Login',//简化路由名，可以不写
-        component:Login
+        path: '/',
+        name: 'Login',//简化路由名，可以不写
+        component: Login
     },
     {
-        path:'/Register',
-        name:'Register',//简化路由名，可以不写
-        component:Register
-    },    
-    {
-        path:'/Algorithm',
-        name:'Algorithm',//简化路由名，可以不写
-        component:Algorithm
+        path: '/Register',
+        name: 'Register',//简化路由名，可以不写
+        component: Register
     },
     {
-        path:'/Statistics',
-        name:'Statistics',//简化路由名，可以不写
-        component:Statistic
-    },    
+        path: '/Algorithm',
+        name: 'Algorithm',//简化路由名，可以不写
+        component: Algorithm
+    },
+    {
+        path: '/Statistics',
+        name: 'Statistics',//简化路由名，可以不写
+        component: Statistic
+    },
+    {
+        path: '/Chart',
+        name: 'Chart',//简化路由名，可以不写
+        component: Chart
+    },
 ]
 //创建并暴露路由器
 export default new VueRouter({
-    routes:routes
+    routes: routes
 })
