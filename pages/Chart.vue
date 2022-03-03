@@ -5,12 +5,19 @@
     <el-input v-model="msg" placeholder="请输入内容"></el-input>
     <el-button type="primary" @click="sendMsg">发送</el-button>
     <ul>
-      <li v-for="item in msgList" :key="item.Msgid">
+      <li v-for="(item,index) in msgList" :key="index">
         <p>
-          <span>{{ item.userId }}</span>
+          <span>{{ item.id }}</span>
           <span>{{ new Date(item.dataTime) }}</span>
         </p>
         <p>消息:{{ item.msg }}</p>
+      </li>
+    </ul>
+    <ul>
+      <li v-for="(item,index) in userList" :key="index">
+        <p>
+          <span>{{ item }}</span>
+        </p>
       </li>
     </ul>
   </el-main>
@@ -24,7 +31,7 @@ export default {
       msg: "",
       id: "",
       msgList: [],
-      userList:[],
+      userList: [],
     };
   },
   mounted() {
@@ -61,13 +68,14 @@ export default {
       this.websock.onopen = this.handleWsOpen;
       this.websock.onerror = this.handleWsError;
       this.websock.onclose = this.handleWsClose;
-        console.log(this)      
+      console.log(this);
     },
     sendWebSocketMsg(event) {
       this.websock.send(JSON.stringify(event));
     },
+    //应该是连接打开后执行
     handleWsOpen(e) {
-      console.log('handleWsOpen调用', e);
+      console.log("handleWsOpen调用", e);
       let enterroom = {
         code: 100,
         msg: this.id,
@@ -78,19 +86,33 @@ export default {
       console.log("断开连接", e.code, " ", e.reason, " ", e.wasClean);
     },
     handleWsError(e) {
-      console.log('handleWsError收到错误', e);
+      console.log("handleWsError收到错误", e);
     },
     handleWsMessage(e) {
-      print(e)
-      let message = e.data;
-      console.log("handleWsMessage收到了消息", message);
-      if (message.code == 100) {
-        console.log("进入房间");
+      console.log("handleWsMessage收到的event", e);
+      let response = e.data;//取到回应
+      //不知道什么原因得到的是字符串,这才取到真正response
+      response=JSON.parse(response);
+      console.log("handleWsMessage收到了消息",response);
+      //请求100更新用户列表
+      if (response.code == 100) {
+        console.log("有人进入房间");
+        this.userList=response['userList']
+      }else if (response.code == 101) {
+        console.log("有人离开房间");
+        this.userList=response['userList']
       }
     },
   },
   beforeDestroy() {
     console.log("该vc被销毁了");
+    //请求更新用户列表去除一个用户
+      let leaveroom = {
+        code: 101,
+        msg: this.id,
+      };
+    this.sendWebSocketMsg(leaveroom);
+    //断开连接
     this.websock.close();
   },
 };
