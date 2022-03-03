@@ -24,6 +24,7 @@ export default {
       msg: "",
       id: "",
       msgList: [],
+      userList:[],
     };
   },
   mounted() {
@@ -62,8 +63,8 @@ export default {
       this.websock.onclose = this.handleWsClose;
         console.log(this)      
     },
-    sendWebSocketMsg(msg) {
-      this.websock.send(JSON.stringify(msg));
+    sendWebSocketMsg(event) {
+      this.websock.send(JSON.stringify(event));
     },
     handleWsOpen(e) {
       console.log('handleWsOpen调用', e);
@@ -77,10 +78,11 @@ export default {
       console.log("断开连接", e.code, " ", e.reason, " ", e.wasClean);
     },
     handleWsError(e) {
-      console.log(3, e);
+      console.log('handleWsError收到错误', e);
     },
     handleWsMessage(e) {
-      let message = JSON.parse(e.data);
+      print(e)
+      let message = e.data;
       console.log("handleWsMessage收到了消息", message);
       if (message.code == 100) {
         console.log("进入房间");
