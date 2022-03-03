@@ -8,9 +8,9 @@
       <li v-for="(item,index) in msgList" :key="index">
         <p>
           <span>{{ item.id }}</span>
-          <span>{{ new Date(item.dataTime) }}</span>
+          <span>{{ item.time }}</span>
         </p>
-        <p>消息:{{ item.msg }}</p>
+        <p>消息:{{ item.text }}</p>
       </li>
     </ul>
     <ul>
@@ -48,15 +48,17 @@ export default {
   },
   methods: {
     sendMsg() {
-      const msg = this.msg;
-      if (!msg.trim().length) {
+      const msg = this.msg.trim();
+      if (!msg.length) {
         return;
       }
+      //群发code200
       let textmsg = {
         code: 200,
         msg: {
           id: this.id,
-          text: this.msg,
+          text: msg,
+          time:new Date().toString(),
         },
       };
       this.sendWebSocketMsg(textmsg);
@@ -101,6 +103,9 @@ export default {
       }else if (response.code == 101) {
         console.log("有人离开房间");
         this.userList=response['userList']
+      }else if (response.code == 200) {
+        console.log("有人群发消息");
+        this.msgList.push(response['msg'])
       }
     },
   },
