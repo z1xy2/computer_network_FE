@@ -19,20 +19,35 @@
         <h1 align="center" style="color: #fff; font-size: 25px">
           欢迎来到聊天室
         </h1>
-        <el-menu-item v-for="(item, index) in userList" :key="index" >
+        <el-menu-item v-for="(item, index) in userList" :key="index">
           <i class="el-icon-user"></i>
           <span style="display: inline-block">{{ item }}</span>
           <el-checkbox v-model="checkList[index]"
             ><span style="color: white">选择</span></el-checkbox
           >
         </el-menu-item>
-        <div style="text-align:center; position:absolute; bottom:10px; width:100%;">
-          <el-button type="primary" icon="el-icon-circle-plus" @click=selectAll></el-button>
-          <el-button type="primary" icon="el-icon-delete" @click=clearAll></el-button>
+        <div
+          style="
+            text-align: center;
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+          "
+        >
+          <el-button
+            type="primary"
+            icon="el-icon-circle-plus"
+            @click="selectAll"
+          ></el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-delete"
+            @click="clearAll"
+          ></el-button>
         </div> </el-menu
     ></el-aside>
     <el-container>
-      <el-main style="background-color: #d3dce6">
+      <el-main style="background-color: #d3dce6; height: 512px">
         <div v-for="(item, index) in msgList" :key="index">
           <p>
             <span>用户: {{ item.id }}</span>
@@ -42,34 +57,66 @@
             >
           </p>
           <div class="chatText">
-            <p>{{ item.text }}</p>
+            <p v-if="item.text.indexOf('data:image/jpeg;base64') == -1">
+              {{ item.text }}
+            </p>
+            <el-image v-if="item.text.indexOf('data:image/jpeg;base64') != -1"
+              style="width: auto; height: 100px"
+              :src="item.text"
+              :preview-src-list="[item.text]"
+            >
+            </el-image>
           </div>
         </div>
       </el-main>
-      <el-footer style="height: auto; background-color: #e9eef3">
+      <el-footer style="height: 230px; background-color: #e9eef3">
         <div id="footer" style="overflow: inherit">
-          <div style="margin-top: 5px ;position:relative">
+          <div class="options">
             <span>用户id:{{ id }}</span>
-             <el-button
+            <el-radio-group v-model="options" style="margin-left: 100px">
+              <el-radio-button label="text">输入文字</el-radio-button>
+              <el-radio-button label="image">输入图片</el-radio-button>
+              <el-radio-button label="file">输入文件</el-radio-button>
+            </el-radio-group>
+            <el-button
               type="primary"
               @click="ssendMsg"
-              style="margin-left: 850px; width: 100px; margin-top: 0px ;"
+              style="margin-left: 200px; width: 100px; margin-top: 0px"
               >选择发送</el-button
             >
             <el-button
               type="primary"
               @click="sendMsg"
-              style="margin-left: 10px; width: 100px; margin-top: 0px ;position:absolute; right:10px"
+              style="
+                margin-left: 10px;
+                width: 100px;
+                margin-top: 0px;
+                position: absolute;
+                right: 10px;
+              "
               >发送</el-button
             >
           </div>
           <el-input
+            v-if="options == 'text'"
             v-model="msg"
             placeholder="请输入内容"
-            :rows="4"
+            :rows="6"
             type="textarea"
             style="margin-top: 5px"
           ></el-input>
+          <el-upload
+            action=""
+            :on-change="getFile"
+            :limit="1"
+            list-type="picture"
+            :auto-upload="false"
+            v-if="options == 'image'"
+          >
+            <el-button size="small" type="primary" style="margin-top: 10px"
+              >选择图片上传,最多上传一张图片</el-button
+            >
+          </el-upload>
         </div>
       </el-footer>
     </el-container>
@@ -82,6 +129,7 @@ export default {
   name: "Chart",
   data() {
     return {
+      options: "text",
       msg: "",
       id: "",
       msgList: [],
@@ -103,7 +151,7 @@ export default {
     // ws.addEventListener("message", this.handleWsMessage.bind(this), false);
   },
   methods: {
-    ssendMsg(){
+    ssendMsg() {
       const msg = this.msg.trim();
       if (!msg.length) {
         return;
@@ -115,28 +163,43 @@ export default {
           id: this.id,
           text: msg,
           time: new Date().toString(),
-          seleUser:this.seleUser
-        },
-      };   
-      console.log('textmsg',textmsg)  
-      this.sendWebSocketMsg(textmsg); 
-    },
-    sendMsg() {
-      const msg = this.msg.trim();
-      if (!msg.length) {
-        return;
-      }
-      //群发code200
-      let textmsg = {
-        code: 200,
-        msg: {
-          id: this.id,
-          text: msg,
-          time: new Date().toString(),
+          seleUser: this.seleUser,
         },
       };
+      console.log("textmsg", textmsg);
       this.sendWebSocketMsg(textmsg);
-      console.log("send msg", this.msg);
+    },
+    sendMsg() {
+      //如果为文本
+      if (this.options == "text") {
+        const msg = this.msg.trim();
+        if (!msg.length) {
+          return;
+        }
+        //群发code200
+        let textmsg = {
+          code: 200,
+          msg: {
+            id: this.id,
+            text: msg,
+            time: new Date().toString(),
+          },
+        };
+        this.sendWebSocketMsg(textmsg);
+        console.log("send msg", this.msg);
+      } else if (this.options == "image") {
+        //为图片
+        let textmsg = {
+          code: 200,
+          msg: {
+            id: this.id,
+            text: this.image,
+            time: new Date().toString(),
+          },
+        };
+        this.sendWebSocketMsg(textmsg);
+        console.log("send msg", this.msg);
+      }
     },
     initWebSocket() {
       this.websock = new WebSocket("ws://127.0.0.1:8000/chart-channel/");
@@ -179,14 +242,41 @@ export default {
         this.userList = response["userList"];
       } else if (response.code == 200) {
         console.log("有人群发消息");
+        // if (response["msg"].indexOf('data:image/jpeg;base64')!=-1){
+        //   //如果为图片，将图片解码
+        // }
         this.msgList.push(response["msg"]);
       }
     },
-    selectAll(){
-      this.checkList=new Array(100).fill(true)
+    selectAll() {
+      this.checkList = new Array(100).fill(true);
     },
-    clearAll(){
-      this.checkList=new Array(100).fill(false)
+    clearAll() {
+      this.checkList = new Array(100).fill(false);
+    },
+    getBase64(file) {
+      return new Promise(function (resolve, reject) {
+        let reader = new FileReader();
+        let imgResult = "";
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+          imgResult = reader.result;
+        };
+        reader.onerror = function (error) {
+          reject(error);
+        };
+        reader.onloadend = function () {
+          resolve(imgResult);
+        };
+      });
+    },
+
+    getFile(file) {
+      console.log(file);
+      this.getBase64(file.raw).then((res) => {
+        console.log(res);
+        this.image = res;
+      });
     },
   },
   beforeDestroy() {
@@ -200,19 +290,19 @@ export default {
     //断开连接
     this.websock.close();
   },
-  computed:{
-    seleUser(){
-      console.log('计算seleUser')
-      var seleUser=[]
-      for(var i=0;i<this.userList.length;i++){
-        if (this.checkList[i]){
-          console.log('push')
-          seleUser.push(this.userList[i])
-        }        
+  computed: {
+    seleUser() {
+      console.log("计算seleUser");
+      var seleUser = [];
+      for (var i = 0; i < this.userList.length; i++) {
+        if (this.checkList[i]) {
+          console.log("push");
+          seleUser.push(this.userList[i]);
+        }
       }
-      return seleUser
-    }
-  }
+      return seleUser;
+    },
+  },
 };
 </script>
 
@@ -234,10 +324,15 @@ export default {
   float: right;
   margin-left: 100px;
 }
-.el-menu{
-  position:relative;
+.el-menu {
+  position: relative;
 }
-.el-menu{
-  position:relative;
+.el-menu {
+  position: relative;
+}
+.options {
+  margin-top: 5px;
+  position: relative;
+  display: flex;
 }
 </style> 
