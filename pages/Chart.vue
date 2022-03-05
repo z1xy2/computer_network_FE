@@ -60,7 +60,8 @@
             <p v-if="item.text.indexOf('data:image/jpeg;base64') == -1">
               {{ item.text }}
             </p>
-            <el-image v-if="item.text.indexOf('data:image/jpeg;base64') != -1"
+            <el-image
+              v-if="item.text.indexOf('data:image/jpeg;base64') != -1"
               style="width: auto; height: 100px"
               :src="item.text"
               :preview-src-list="[item.text]"
@@ -107,7 +108,7 @@
           ></el-input>
           <el-upload
             action=""
-            :on-change="getFile"
+            :on-change="getImgFile"
             :limit="1"
             list-type="picture"
             :auto-upload="false"
@@ -116,6 +117,16 @@
             <el-button size="small" type="primary" style="margin-top: 10px"
               >选择图片上传,最多上传一张图片</el-button
             >
+          </el-upload>
+          <el-upload
+            action="https://jsonplaceholder.typicode.com/posts/"
+            v-if="options == 'file'"
+            :limit="1"
+            :auto-upload="false"
+            :on-change="getBigFile"
+          >
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">请选择文件</div>
           </el-upload>
         </div>
       </el-footer>
@@ -134,7 +145,10 @@ export default {
       id: "",
       msgList: [],
       userList: [],
+      file: "",
       checkList: new Array(100).fill(false),
+      receiveFile: "",
+      chunkListL: [],
     };
   },
   mounted() {
@@ -151,6 +165,10 @@ export default {
     // ws.addEventListener("message", this.handleWsMessage.bind(this), false);
   },
   methods: {
+    getBigFile(file) {
+      this.file = file;
+      console.log(file);
+    },
     ssendMsg() {
       const msg = this.msg.trim();
       if (!msg.length) {
@@ -199,6 +217,46 @@ export default {
         };
         this.sendWebSocketMsg(textmsg);
         console.log("send msg", this.msg);
+      } else if (this.options == "file") {
+        const blob = this.file.raw;
+        console.log(blob);
+        //后面改为40960
+        const bytesPerPiece = 1024*3;
+        const totalSize = blob.size;
+        let start = 0;
+        let end;
+        var count = 0;
+        var time=new Date().toString()
+        var fileName=blob.name        
+        while (start < blob.size) {
+          end = start + bytesPerPiece;
+          if (end > blob.size) {
+            end = blob.size;
+          }
+          // 切割文件
+          var chunk = blob.slice(start, end);
+          //getvase是异步函数，造成了还未赋值完就执行了后面的操作，导致结果出错，并非chunk作用域的问题,详情见收藏夹!
+          //时间回调函数和promise中的then后面的函数都是异步的，写代码需要特别小心
+          this.getBase64(chunk).then((res) => {
+            console.log(res);
+            // 发送数据到服务器
+            this.sendWebSocketMsg({
+              code: 300,
+              msg: {
+                id: this.id,
+                time:time,
+                chunk: res,
+                count: count,
+                len:Math.ceil(totalSize/bytesPerPiece),
+                fileName:fileName
+              },
+            });
+            count++;
+          });
+          start = end;
+        }
+        // 表示发送完毕
+        console.log("同步已执行完成");
       }
     },
     initWebSocket() {
@@ -242,10 +300,9 @@ export default {
         this.userList = response["userList"];
       } else if (response.code == 200) {
         console.log("有人群发消息");
-        // if (response["msg"].indexOf('data:image/jpeg;base64')!=-1){
-        //   //如果为图片，将图片解码
-        // }
         this.msgList.push(response["msg"]);
+      } else if (response.code == 300) {
+        console.log("有人群发文件");
       }
     },
     selectAll() {
@@ -257,21 +314,21 @@ export default {
     getBase64(file) {
       return new Promise(function (resolve, reject) {
         let reader = new FileReader();
-        let imgResult = "";
+        let Result = "";
         reader.readAsDataURL(file);
         reader.onload = function () {
-          imgResult = reader.result;
+          Result = reader.result;
         };
         reader.onerror = function (error) {
           reject(error);
         };
         reader.onloadend = function () {
-          resolve(imgResult);
+          resolve(Result);
         };
       });
     },
 
-    getFile(file) {
+    getImgFile(file) {
       console.log(file);
       this.getBase64(file.raw).then((res) => {
         console.log(res);
