@@ -57,9 +57,6 @@
             >
           </p>
           <div class="chatText">
-            <p v-if="item.text.indexOf('data:image/jpeg;base64') == -1">
-              {{ item.text }}
-            </p>
             <el-image
               v-if="item.text.indexOf('data:image/jpeg;base64') != -1"
               style="width: auto; height: 100px"
@@ -67,6 +64,15 @@
               :preview-src-list="[item.text]"
             >
             </el-image>
+            <p v-else-if="item.text.indexOf('http') == -1">
+              {{ item.text }}
+            </p>
+            <p v-else>
+              文件: {{ item.fileName }}
+              <span
+                ><i class="el-icon-download" @click="download(item.text)"></i
+              ></span>
+            </p>
           </div>
         </div>
       </el-main>
@@ -165,27 +171,88 @@ export default {
     // ws.addEventListener("message", this.handleWsMessage.bind(this), false);
   },
   methods: {
+    download(text) {
+      window.open(text);
+    },
     getBigFile(file) {
       this.file = file;
       console.log(file);
     },
     ssendMsg() {
-      const msg = this.msg.trim();
-      if (!msg.length) {
-        return;
+      if (this.options == "text") {
+        const msg = this.msg.trim();
+        if (!msg.length) {
+          return;
+        }
+        //指定用户发送文本code为250
+        let textmsg = {
+          code: 250,
+          msg: {
+            id: this.id,
+            text: msg,
+            time: new Date().toString(),
+            seleUser: this.seleUser,
+          },
+        };
+        console.log("textmsg", textmsg);
+        this.sendWebSocketMsg(textmsg);
+      }else if(this.options == "image"){
+        //为图片也是发送base64的文本且操作和文字相同所以也是250
+        let textmsg = {
+          code: 250,
+          msg: {
+            id: this.id,
+            text: this.image,
+            time: new Date().toString(),
+            seleUser: this.seleUser,
+          },
+        };
+        this.sendWebSocketMsg(textmsg);
+        console.log("send msg", this.msg);        
+      }else{
+        //文件发送的虽然也是文本但要另操作
+        const blob = this.file.raw;
+        console.log(blob);
+        //后面改为40960
+        const bytesPerPiece = 409600;
+        const totalSize = blob.size;
+        let start = 0;
+        let end;
+        var count = 0;
+        var time = new Date().toString();
+        var fileName = blob.name;
+        while (start < blob.size) {
+          end = start + bytesPerPiece;
+          if (end > blob.size) {
+            end = blob.size;
+          }
+          // 切割文件
+          var chunk = blob.slice(start, end);
+          //getvase是异步函数，造成了还未赋值完就执行了后面的操作，导致结果出错，并非chunk作用域的问题,详情见收藏夹!
+          //时间回调函数和promise中的then后面的函数都是异步的，写代码需要特别小心
+          this.getBase64(chunk).then((res) => {
+            console.log(res);
+            // 发送数据到服务器
+            this.sendWebSocketMsg({
+              code: 350,
+              msg: {
+                id: this.id,
+                time: time,
+                chunk: res,
+                count: count,
+                len: Math.ceil(totalSize / bytesPerPiece),
+                fileName: fileName,
+                seleUser: this.seleUser,
+              },
+            });
+            count++;
+          });
+          start = end;
+        }
+        // 表示发送完毕
+        console.log("同步已执行完成");        
       }
-      //指定用户发送code、250
-      let textmsg = {
-        code: 250,
-        msg: {
-          id: this.id,
-          text: msg,
-          time: new Date().toString(),
-          seleUser: this.seleUser,
-        },
-      };
-      console.log("textmsg", textmsg);
-      this.sendWebSocketMsg(textmsg);
+
     },
     sendMsg() {
       //如果为文本
@@ -221,13 +288,13 @@ export default {
         const blob = this.file.raw;
         console.log(blob);
         //后面改为40960
-        const bytesPerPiece = 1024*3;
+        const bytesPerPiece = 409600;
         const totalSize = blob.size;
         let start = 0;
         let end;
         var count = 0;
-        var time=new Date().toString()
-        var fileName=blob.name        
+        var time = new Date().toString();
+        var fileName = blob.name;
         while (start < blob.size) {
           end = start + bytesPerPiece;
           if (end > blob.size) {
@@ -244,11 +311,11 @@ export default {
               code: 300,
               msg: {
                 id: this.id,
-                time:time,
+                time: time,
                 chunk: res,
                 count: count,
-                len:Math.ceil(totalSize/bytesPerPiece),
-                fileName:fileName
+                len: Math.ceil(totalSize / bytesPerPiece),
+                fileName: fileName,
               },
             });
             count++;
@@ -303,6 +370,8 @@ export default {
         this.msgList.push(response["msg"]);
       } else if (response.code == 300) {
         console.log("有人群发文件");
+      } else if (response.code == 301) {
+        this.msgList.push(response["msg"]);
       }
     },
     selectAll() {
