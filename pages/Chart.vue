@@ -88,8 +88,14 @@
             <el-button
               type="primary"
               @click="ssendMsg"
-              style="margin-left: 200px; width: 100px; margin-top: 0px"
+              style="margin-left: 300px; width: 100px; margin-top: 0px"
               >选择发送</el-button
+            >
+            <el-button
+              type="primary"
+              @click="sendVedio"
+              style="margin-left: 50px; width: 100px; margin-top: 0px"
+              >发起视频</el-button
             >
             <el-button
               type="primary"
@@ -171,6 +177,13 @@ export default {
     // ws.addEventListener("message", this.handleWsMessage.bind(this), false);
   },
   methods: {
+    sendVedio() {
+      var request = {
+        code: 600,
+      };
+      this.sendWebSocketMsg(request);
+      window.open("http://127.0.0.1:8081/p2p?type=offer");
+    },
     download(text) {
       window.open(text);
     },
@@ -196,7 +209,7 @@ export default {
         };
         console.log("textmsg", textmsg);
         this.sendWebSocketMsg(textmsg);
-      }else if(this.options == "image"){
+      } else if (this.options == "image") {
         //为图片也是发送base64的文本且操作和文字相同所以也是250
         let textmsg = {
           code: 250,
@@ -208,8 +221,8 @@ export default {
           },
         };
         this.sendWebSocketMsg(textmsg);
-        console.log("send msg", this.msg);        
-      }else{
+        console.log("send msg", this.msg);
+      } else {
         //文件发送的虽然也是文本但要另操作
         const blob = this.file.raw;
         console.log(blob);
@@ -250,9 +263,8 @@ export default {
           start = end;
         }
         // 表示发送完毕
-        console.log("同步已执行完成");        
+        console.log("同步已执行完成");
       }
-
     },
     sendMsg() {
       //如果为文本
@@ -372,6 +384,15 @@ export default {
         console.log("有人群发文件");
       } else if (response.code == 301) {
         this.msgList.push(response["msg"]);
+      } else if (response.code == 600) {
+        this.$alert("用户请求视频聊天", {
+          confirmButtonText: "确定",
+          callback: (action) => {
+            if(action=='confirm'){ 
+              window.open("http://127.0.0.1:8081/p2p?type=answer");
+            }            
+          },
+        });
       }
     },
     selectAll() {
